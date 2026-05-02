@@ -1,11 +1,12 @@
 <?php
-class Database {
-public static function connect() {
-require_once __DIR__ . '/../protected/config.inc.php';
-$pdo = new PDO(DBCONNSTRING, DBUSER, DBPASS, [
-PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-]);
-return $pdo;
-}
+
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db = "storesdb";
+
+$conn = new sqli($host, $user, $pass, $db);
+
+if(conn->connect_error){
+    die("Connection error: " . $conn->connect_error);
 }
