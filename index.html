@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stores</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .checked { text-decoration: line-through; color: gray; }
+  </style>
+</head>
+<body>
+
+<h1>Stores</h1>
+
+<input id="storeInput" placeholder="New Store">
+<button onclick="addStore()">Add Store</button>
+
+<div id="stores"></div>
+
+<script>
+const API = "http://localhost/code/index.php";
+
+async function loadStores() {
+  const res = await fetch(API + "/stores");
+  const stores = await res.json();
+
+  const container = document.getElementById("stores");
+  container.innerHTML = "";
+
+  for (let store of stores) {
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+      <h2>${store.name}
+        <button onclick="deleteStore(${store.id})">❌</button>
+      </h2>
+
+      <input placeholder="Add item"
+        onkeydown="if(event.key==='Enter') addItem(${store.id}, this.value)">
+
+      <ul id="items-${store.id}"></ul>
+    `;
+
+    container.appendChild(div);
+    loadItems(store.id);
+  }
+}
+
+
+async function loadItems(storeId) {
+  const res = await fetch(API + "/items/" + storeId);
+  const items = await res.json();
+
+  const list = document.getElementById("items-" + storeId);
+  list.innerHTML = "";
+
+  for (let item of items) {
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <span class="${item.checked == 1 ? 'checked' : ''}"
+            onclick="toggleItem(${item.id}, ${item.checked == 1 ? 0 : 1})">
+        ${item.name}
+      </span>
+      <button onclick="deleteItem(${item.id})">🗑</button>
+    `;
+
+    list.appendChild(li);
+  }
+}
+
+
+async function addStore() {
+  const name = document.getElementById("storeInput").value;
+
+  await fetch(API + "/stores" , {
+    method: "POST",
+    body: JSON.stringify({ name })
+  });
+
+  loadStores();
+}
+
+
+async function addItem(storeId, name) {
+  await fetch(API + "/items/" + storeId, {
+    method: "POST",
+    body: JSON.stringify({ name })
+  });
+
+  loadStores();
+}
+
+
+async function toggleItem(id, checked) {
+  await fetch(API + "/items/" + id, {
+    method: "PUT",
+    body: JSON.stringify({ checked })
+  });
+
+  loadStores();
+}
+
+
+async function deleteItem(id) {
+  await fetch(API + "/items/" + id, { method: "DELETE" });
+  loadStores();
+}
+
+
+async function deleteStore(id) {
+  await fetch(API + "/stores/" + id, { method: "DELETE" });
+  loadStores();
+}
+
+
+loadStores();
+</script>
+
+</body>
+</html>
