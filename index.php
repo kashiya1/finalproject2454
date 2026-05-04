@@ -1,74 +1,69 @@
 <?php
 
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-header("Access-Control-Allow-Headers: Content-Type");
-
-require 'db.php';
-
-$method = $_SERVER['REQUEST_METHOD'];
-$path = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
-
-$resource = $path[1] ?? null;
-$id = $path[2] ?? null;
-
-$data = json_decode(file_get_contents("php://input"), true);
-
-
-if ($method === "GET" && $resource === "stores") {
-    $result = $conn->query("SELECT * FROM stores");
-    echo json_encode($result->fetch_all(MYSQLI_ASSOC));
-}
-
-
-if ($method === "GET" && $resource === "items" && $id) {
-    $stmt = $conn->prepare("SELECT * FROM items WHERE store_id=?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    echo json_encode($result->fetch_all(MYSQLI_ASSOC));
+class stores {
     
-
-
-if ($method === "POST" && $resource === "stores") {
-    $stmt = $conn->prepare("INSERT INTO stores (name) VALUES (?)");
-    $stmt->bind_param("s", $data['name']);
-    $stmt->execute();
-    echo json_encode(["message" => "Store created"]);
+    private $id, $name, $created_at;
+    
+    public function _construct($id, $name, $created_at){
+       
+        $this->set_store_id($id);
+        $this->name($name);
+        $this->created_at($created_at);
+    }
+    public function set_store_id($id){
+         $this->id = $id;
+    }
+    public function get_id() {
+        return $this->id;
+    }
+    public function set_name($name){
+        $this->name = $name;
+    }
+    public function get_name(){
+        return $this->name;
+    }
+    
+    public function set_created_at($created_at){
+        $this->created_at = $this->created_at;
+    }
+    public function get_created_at(){
+        return $this->created_at;
+}
+function list_items(){
+    global $data_source_name;
+    
+    $query = 'SELECT id, name, created_at FROM stores';
+    
+    $statement = $data_source_name->prepare($query);
+    
+    $statement->bindValue("id", $store->get_id());
+    $statement->bindValue("name", $store->get_name());
+    $statement->bindValue("created_at", $store->get_created_at());
+    
+    $statement->execute();
+    
+    $stores->$statement->fetchAll();
+    
+    $statement->closeCursor();
+    $stores_array = array();
+    
+    function update_store($store){
+        global $database;
+        
+        $query = "update store set name = :name,  created_at = :created_at" . " where id = :_id ";
+        
+    }
+    
+    foreach ($stores as $store){
+        $items_array[] = new Stores($items['id'], $items['name'], $items['created_at'] );
+    }
+    return stores_array;
+}
 }
 
 
-if ($method === "POST" && $resource === "items" && $id) {
-    $stmt = $conn->prepare("INSERT INTO items (store_id, name) VALUES (?, ?)");
-    $stmt->bind_param("is", $id, $data['name']);
-    $stmt->execute();
-    echo json_encode(["message" => "Item added"]);
-}
+ 
 
 
-
-
-if ($method === "PUT" && $resource === "items" && $id) {
-    $stmt = $conn->prepare("UPDATE items SET checked=? WHERE id=?");
-    $stmt->bind_param("ii", $data['checked'], $id);
-    $stmt->execute();
-    echo json_encode(["message" => "Item updated"]);
-}
-
-
-if ($method === "DELETE" && $resource === "stores" && $id) {
-    $stmt = $conn->prepare("DELETE FROM stores WHERE id=?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    echo json_encode(["message" => "Store deleted"]);
-}
-
-
-if ($method === "DELETE" && $resource === "items" && $id) {
-    $stmt = $conn->prepare("DELETE FROM items WHERE id=?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    echo json_encode(["message" => "Item deleted"]);
-}
-}
+  
+  
